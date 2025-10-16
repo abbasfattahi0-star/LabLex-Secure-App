@@ -1,12 +1,8 @@
 {
-  "name": "gemini-secure-proxy",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "@google/genai": "^0.14.0"
-  },
-  "type": "module",
-  "scripts": {                     // <-- این بخش را اضافه یا اصلاح کنید
-    "build": "vite build"          // <-- این خط Build Command را تعریف می‌کند
-  }
+  "rewrites": [
+    { 
+      "source": "/(.*)", 
+      "destination": "/dist/$1" 
+    }
+  ]
 }
