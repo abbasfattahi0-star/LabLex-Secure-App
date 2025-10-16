@@ -1,8 +1,15 @@
 {
-  "rewrites": [
-    { 
-      "source": "/(.*)", 
-      "destination": "/dist/$1" 
-    }
-  ]
+  "name": "gemini-secure-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@google/genai": "^0.14.0"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "vercel-build": "npm run build"
+  }
 }
