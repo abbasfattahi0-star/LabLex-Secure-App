@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Lex - مترجم هوشمند علوم پایه</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- PDF.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script>
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: radial-gradient(ellipse at bottom, #0f172a 0%, #020617 100%);
+            color: #d1d5db;
+            overflow-x: hidden;
+        }
+        #global-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .animated-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(45, 212, 191, 0), rgba(45, 212, 191, 0.7), rgba(45, 212, 191, 0));
+            animation: move 15s linear infinite;
+        }
+        @keyframes move {
+            0% { transform: translateY(-10vh) translateX(-100%); }
+            100% { transform: translateY(110vh) translateX(100%); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        .glass-card {
+            background-color: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 1.5rem;
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+        }
+        .modal { transition: opacity 0.3s ease; }
+        .word-item {
+            transition: all 0.3s ease-in-out;
+            background-color: rgba(30, 41, 59, 0.8);
+            border-color: rgba(51, 65, 85, 1);
+        }
+        .word-item:hover {
+            transform: translateY(-6px) scale(1.05);
+            box-shadow: 0 15px 25px -10px rgba(0,0,0,0.3);
+            border-color: #2dd4bf;
+        }
+        .btn-level {
+             transition: all 0.4s ease;
+             border: 2px solid transparent;
+        }
+        .btn-level:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px -5px currentColor;
+        }
+        .tab-btn.active, .tab-btn-input.active {
+            border-color: #2dd4bf;
+            color: #5eead4;
+            box-shadow: 0 0 15px rgba(94, 234, 212, 0.3);
+        }
+        .quiz-option {
+            transition: all 0.3s ease;
+            background-color: rgba(30, 41, 59, 0.8);
+            border-color: rgba(51, 65, 85, 1);
+        }
+        .quiz-option:hover:not(:disabled) {
+            transform: translateY(-3px);
+            border-color: #2dd4bf;
+            color: #5eead4;
+        }
+        .quiz-option.correct {
+            background-color: rgba(22, 101, 52, 0.6);
+            border-color: #22c55e;
+            color: #f0fdf4;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+        }
+        .quiz-option.incorrect {
+            background-color: rgba(127, 29, 29, 0.6);
+            border-color: #ef4444;
+            color: #fef2f2;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+        .number-input {
+            direction: ltr;
+        }
+        
+        .falling-item {
+            position: absolute;
+            top: -50px;
+            animation: fall linear forwards;
+            color: rgba(203, 213, 225, 0.2);
+            font-size: 1.5rem;
+            pointer-events: none;
+            z-index: -1;
+            text-shadow: 0 0 8px rgba(94, 234, 212, 0.3);
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(105vh) rotate(360deg);
+            }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px rgba(94, 234, 212, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(94, 234, 212, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(94, 234, 212, 0.5); }
+        }
+        .pulse-glow {
+            animation: pulse-glow 3s infinite;
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes bounce-in {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .bounce-in {
+            animation: bounce-in 0.8s ease-out;
+        }
+        
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(255,255,255,0.8);
+            animation: sparkle 2s infinite;
+        }
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.25.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="min-h-screen">
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

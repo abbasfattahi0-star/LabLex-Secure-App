@@ -1,0 +1,5 @@
+{
+  "name": "Lab Lex - Smart Science Translator",
+  "description": "An intelligent translator for basic science vocabulary. Users can upload images or PDFs, or input text directly. The application extracts technical terms, provides detailed definitions, examples, and pronunciations, and offers a quiz to test knowledge.",
+  "requestFramePermissions": []
+}
