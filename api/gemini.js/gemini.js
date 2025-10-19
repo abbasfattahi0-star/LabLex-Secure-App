@@ -1,6 +1,10 @@
-const { GoogleGenerativeAI } = require('@google/genai');
+import { GoogleGenerativeAI } from '@google/genai';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-module.exports = async (req, res) => {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse,
+) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -12,7 +16,13 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    // Ensure the API key is available
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not set in environment variables.");
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const result = await model.generateContent(prompt);
@@ -23,6 +33,8 @@ module.exports = async (req, res) => {
 
   } catch (error) {
     console.error("Error in API function:", error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    // Avoid leaking sensitive error details in production
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return res.status(500).json({ error: 'Internal Server Error', details: errorMessage });
   }
-};
+}
