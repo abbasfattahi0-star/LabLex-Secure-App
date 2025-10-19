@@ -1,32 +1,21 @@
-import { GoogleGenerativeAI } from '@google/genai';
+const { GoogleGenerativeAI } = require('@google/genai');
 
-// This configures the function to run on Vercel's Edge Network for speed
-export const config = {
-  runtime: 'edge',
-};
-
-// This is the main function that handles requests
-export default async function handler(req) {
+module.exports = async (req, res) => {
   // Ensure the request is a POST request
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // Get the user's prompt from the request body
-    const { prompt } = await req.json();
+    // Note: Vercel's Node.js runtime uses req.body
+    const { prompt } = req.body;
 
     if (!prompt) {
-      return new Response(JSON.stringify({ error: 'Prompt is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    // Initialize Google Gemini with the secret API key from Vercel's environment variables
+    // Initialize Google Gemini with the secret API key
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
@@ -36,17 +25,11 @@ export default async function handler(req) {
     const text = await response.text();
 
     // Send the Gemini's response back to the user's browser
-    return new Response(JSON.stringify({ text }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(200).json({ text: text });
 
   } catch (error) {
     // If anything goes wrong, send back an error message
-    console.error(error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch from Gemini API' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error("Error in API function:", error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
