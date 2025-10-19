@@ -1,3 +1,4 @@
+// حالت نهایی (صحیح)
 {
   "name": "gemini-secure-proxy",
   "version": "1.0.0",
@@ -5,11 +6,5 @@
   "dependencies": {
     "@google/genai": "^0.14.0"
   },
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "vercel-build": "npm run build"
-  }
+  "type": "module"
 }
