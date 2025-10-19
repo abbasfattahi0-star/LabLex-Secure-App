@@ -16,7 +16,6 @@ export default async function handler(
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    // Ensure the API key is available
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not set in environment variables.");
@@ -33,7 +32,6 @@ export default async function handler(
 
   } catch (error) {
     console.error("Error in API function:", error);
-    // Avoid leaking sensitive error details in production
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     return res.status(500).json({ error: 'Internal Server Error', details: errorMessage });
   }
