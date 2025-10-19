@@ -1,27 +1,52 @@
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/genai';
 
-const apiKey = process.env.GEMINI_API_KEY; 
-const ai = new GoogleGenAI({ apiKey });
+// This configures the function to run on Vercel's Edge Network for speed
+export const config = {
+  runtime: 'edge',
+};
 
-export default async (req, res) => {
+// This is the main function that handles requests
+export default async function handler(req) {
+  // Ensure the request is a POST request
   if (req.method !== 'POST') {
-    return res.status(405).send('Method Not Allowed');
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
-    const { prompt, model, contents, config } = req.body; 
-    
-    // پارامترها را مستقیماً به API می‌فرستیم
-    const response = await ai.models.generateContent({
-      model: model || "gemini-2.5-flash", // استفاده از مدل ارسالی یا دیفالت
-      contents: contents || [{ role: "user", parts: [{ text: prompt }] }],
-      config: config || {}
+    // Get the user's prompt from the request body
+    const { prompt } = await req.json();
+
+    if (!prompt) {
+      return new Response(JSON.stringify({ error: 'Prompt is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Initialize Google Gemini with the secret API key from Vercel's environment variables
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    // Send the prompt to the Gemini API
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = await response.text();
+
+    // Send the Gemini's response back to the user's browser
+    return new Response(JSON.stringify({ text }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
     });
 
-    res.status(200).json({ text: response.text, candidates: response.candidates });
-
   } catch (error) {
-    console.error("Error calling Gemini API:", error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    // If anything goes wrong, send back an error message
+    console.error(error);
+    return new Response(JSON.stringify({ error: 'Failed to fetch from Gemini API' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
-};
+}
